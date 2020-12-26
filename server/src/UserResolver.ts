@@ -4,9 +4,9 @@ import { User } from './entity/User';
 
 @Resolver()
 export class UserResolver {
-	@Query(() => String)
-	hello() {
-		return 'wdlkng';
+	@Query(() => [User])
+	users() {
+		return User.find();
 	}
 
 	@Mutation(() => Boolean)
