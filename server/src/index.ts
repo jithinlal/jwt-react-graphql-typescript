@@ -8,7 +8,8 @@ import { createConnection } from 'typeorm';
 import { UserResolver } from './UserResolver';
 import { verify } from 'jsonwebtoken';
 import { User } from './entity/User';
-import { createAccessToken } from './auth';
+import { createAccessToken, createRefreshToken } from './auth';
+import { sendRefreshToken } from './utils/sendRefreshToken';
 
 (async () => {
 	const app = express();
@@ -26,8 +27,8 @@ import { createAccessToken } from './auth';
 					accessToken: '',
 				});
 			}
-			let payload: any = null;
 
+			let payload: any = null;
 			payload = verify(token, process.env.REFRESH_TOKEN_SECRET!);
 
 			const user = await User.findOne({ id: payload.userId });
@@ -37,6 +38,8 @@ import { createAccessToken } from './auth';
 					accessToken: '',
 				});
 			}
+
+			sendRefreshToken(res, createRefreshToken(user));
 
 			return res.send({
 				ok: true,

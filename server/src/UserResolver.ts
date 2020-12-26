@@ -13,6 +13,7 @@ import { createAccessToken, createRefreshToken } from './auth';
 import { User } from './entity/User';
 import { isAuthMiddleware } from './isAuthMiddleware';
 import { MyContext } from './MyContext';
+import { sendRefreshToken } from './utils/sendRefreshToken';
 
 @ObjectType()
 class LoginResponse {
@@ -68,9 +69,7 @@ export class UserResolver {
 				throw new Error('Invalid login credentials!');
 			}
 
-			res.cookie(process.env.COOKIE_NAME!, createRefreshToken(user), {
-				httpOnly: true,
-			});
+			sendRefreshToken(res, createRefreshToken(user));
 
 			return {
 				accessToken: createAccessToken(user),
