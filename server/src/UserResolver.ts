@@ -7,9 +7,11 @@ import {
 	ObjectType,
 	Query,
 	Resolver,
+	UseMiddleware,
 } from 'type-graphql';
 import { createAccessToken, createRefreshToken } from './auth';
 import { User } from './entity/User';
+import { isAuthMiddleware } from './isAuthMiddleware';
 import { MyContext } from './MyContext';
 
 @ObjectType()
@@ -24,6 +26,7 @@ class LoginResponse {
 @Resolver()
 export class UserResolver {
 	@Query(() => [User])
+	@UseMiddleware(isAuthMiddleware)
 	users() {
 		return User.find();
 	}
