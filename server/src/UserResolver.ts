@@ -3,12 +3,14 @@ import {
 	Arg,
 	Ctx,
 	Field,
+	Int,
 	Mutation,
 	ObjectType,
 	Query,
 	Resolver,
 	UseMiddleware,
 } from 'type-graphql';
+import { getConnection } from 'typeorm';
 import { createAccessToken, createRefreshToken } from './auth';
 import { User } from './entity/User';
 import { isAuthMiddleware } from './isAuthMiddleware';
@@ -82,5 +84,15 @@ export class UserResolver {
 				errorMessage: error.message,
 			};
 		}
+	}
+
+	// ! don't write a mutation for revoking tokens. Keep this logic inside a function
+	@Mutation(() => Boolean)
+	async revokeRefreshTokensForUser(@Arg('userId', () => Int) userId: number) {
+		await getConnection()
+			.getRepository(User)
+			.increment({ id: userId }, 'tokenVersion', 1);
+
+		return true;
 	}
 }
