@@ -1,14 +1,16 @@
 import { compare, hash } from 'bcryptjs';
-import { sign } from 'jsonwebtoken';
 import {
 	Arg,
+	Ctx,
 	Field,
 	Mutation,
 	ObjectType,
 	Query,
 	Resolver,
 } from 'type-graphql';
+import { createAccessToken, createRefreshToken } from './auth';
 import { User } from './entity/User';
+import { MyContext } from './MyContext';
 
 @ObjectType()
 class LoginResponse {
@@ -50,6 +52,7 @@ export class UserResolver {
 	async login(
 		@Arg('email') email: string,
 		@Arg('password') password: string,
+		@Ctx() { res }: MyContext,
 	): Promise<LoginResponse> {
 		try {
 			const user = await User.findOne({ where: { email } });
@@ -62,10 +65,12 @@ export class UserResolver {
 				throw new Error('Invalid login credentials!');
 			}
 
+			res.cookie('jid', createRefreshToken(user), {
+				httpOnly: true,
+			});
+
 			return {
-				accessToken: sign({ userId: user.id }, 'secret_random_string', {
-					expiresIn: '15m',
-				}),
+				accessToken: createAccessToken(user),
 				errorMessage: '',
 			};
 		} catch (error) {
