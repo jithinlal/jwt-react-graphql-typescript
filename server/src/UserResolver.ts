@@ -68,7 +68,7 @@ export class UserResolver {
 				throw new Error('Invalid login credentials!');
 			}
 
-			res.cookie('jid', createRefreshToken(user), {
+			res.cookie(process.env.COOKIE_NAME!, createRefreshToken(user), {
 				httpOnly: true,
 			});
 
