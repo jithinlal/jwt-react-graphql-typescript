@@ -5,8 +5,9 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import { buildSchema } from 'type-graphql';
 import { createConnection } from 'typeorm';
-import { UserResolver } from './UserResolver';
 import { verify } from 'jsonwebtoken';
+import cors from 'cors';
+import { UserResolver } from './UserResolver';
 import { User } from './entity/User';
 import { createAccessToken, createRefreshToken } from './auth';
 import { sendRefreshToken } from './utils/sendRefreshToken';
@@ -14,6 +15,12 @@ import { sendRefreshToken } from './utils/sendRefreshToken';
 (async () => {
 	const app = express();
 
+	app.use(
+		cors({
+			credentials: true,
+			origin: 'http://localhost:3000',
+		}),
+	);
 	app.use(cookieParser());
 
 	// * this is a special route to fetch a new access token
@@ -73,7 +80,7 @@ import { sendRefreshToken } from './utils/sendRefreshToken';
 		}),
 	});
 
-	apolloServer.applyMiddleware({ app });
+	apolloServer.applyMiddleware({ app, cors: false });
 
 	app.listen(4000, () => {
 		console.log(`Server started on port: 4000`);
